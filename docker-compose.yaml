@@ -1,0 +1,52 @@
+# ====================
+# 공통 설정 정의
+# ====================
+x-common: &common
+  stdin_open: true
+  tty: true
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+  environment:
+    - DISPLAY=${DISPLAY}
+    - NVIDIA_VISIBLE_DEVICES=all
+    - NVIDIA_DRIVER_CAPABILITIES=all
+  volumes:
+    - .:/home/${USER_NAME}/workspace
+    - /tmp/.X11-unix:/tmp/.X11-unix:rw
+  network_mode: host
+
+services:
+  # ====================
+  # Base Image
+  # ====================
+  base:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: base
+      args:
+        USER_NAME: ${USER_NAME}
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+    image: 3dfa-base:latest
+    <<: *common
+
+  # ====================
+  # PerAct2 Image
+  # ====================
+  peract2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: peract2
+      args:
+        USER_NAME: ${USER_NAME}
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+    image: 3dfa-peract2:latest
+    <<: *common
