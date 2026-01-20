@@ -1,0 +1,5 @@
+# ====================
+# PerAct2 Dependencies
+# ====================
+open3d
+poetry-core

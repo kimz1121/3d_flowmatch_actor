@@ -1,0 +1,426 @@
+nohup: ignoring input
+time="2026-01-20T19:21:51+09:00" level=warning msg="No services to build"
+ Image 3dfa-peract2:latest Pulling 
+ Image 3dfa-peract2:latest pull access denied for 3dfa-peract2, repository does not exist or may require 'docker login' 
+ Image 3dfa-peract2:latest Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 675B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 3.01kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/nvidia/cuda:12.1.0-devel-ubuntu22.04
+#3 DONE 0.6s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [base 1/7] FROM docker.io/nvidia/cuda:12.1.0-devel-ubuntu22.04@sha256:e3a8f7b933e77ecee74731198a2a5483e965b585cea2660675cf4bb152237e9b
+#5 resolve docker.io/nvidia/cuda:12.1.0-devel-ubuntu22.04@sha256:e3a8f7b933e77ecee74731198a2a5483e965b585cea2660675cf4bb152237e9b 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 218B done
+#6 DONE 0.0s
+
+#7 [base 3/7] RUN groupadd -g 1000 iw &&     useradd -m -u 1000 -g 1000 -s /bin/bash iw &&     echo "iw ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+#7 CACHED
+
+#8 [base 5/7] RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel
+#8 CACHED
+
+#9 [base 6/7] COPY --chown=iw:iw docker/requirements.txt /tmp/requirements.txt
+#9 CACHED
+
+#10 [base 2/7] RUN apt-get update && apt-get install -y --no-install-recommends     git     wget     curl     vim     build-essential     python3     python3-pip     python3-dev     python3-venv     sudo     cmake     pkg-config     libgl1-mesa-glx     libgl1-mesa-dri     libegl1-mesa     libglib2.0-0     x11-apps     ffmpeg     libavformat-dev     libavcodec-dev     libavdevice-dev     libavutil-dev     libswscale-dev     libswresample-dev     libavfilter-dev     && apt-get clean     && rm -rf /var/lib/apt/lists/*
+#10 CACHED
+
+#11 [base 4/7] WORKDIR /home/iw
+#11 CACHED
+
+#12 [base 7/7] RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
+#12 CACHED
+
+#13 [peract2 1/8] RUN apt-get update && apt-get install -y --no-install-recommends     libffi-dev     libxcb-xinerama0     libxkbcommon-x11-0     libxcb-cursor0     libxcb-keysyms1     libxcb-randr0     libxcb-render-util0     libxcb-icccm4     libxcb-image0     libxcb-shape0     libxcb-xfixes0     libxcb-sync1     libsm6     libxrender1     libfontconfig1     xvfb     && apt-get clean     && rm -rf /var/lib/apt/lists/*
+#13 CACHED
+
+#14 [peract2 2/8] WORKDIR /home/iw
+#14 CACHED
+
+#15 [peract2 3/8] COPY --chown=iw:iw docker/requirements-peract2.txt /tmp/requirements-peract2.txt
+#15 DONE 0.0s
+
+#16 [peract2 4/8] RUN pip3 install --no-cache-dir -r /tmp/requirements-peract2.txt
+#16 0.306 Defaulting to user installation because normal site-packages is not writeable
+#16 0.438 Collecting open3d (from -r /tmp/requirements-peract2.txt (line 4))
+#16 0.494   Downloading open3d-0.19.0-cp310-cp310-manylinux_2_31_x86_64.whl.metadata (4.3 kB)
+#16 0.510 Collecting poetry-core (from -r /tmp/requirements-peract2.txt (line 5))
+#16 0.516   Downloading poetry_core-2.3.0-py3-none-any.whl.metadata (3.8 kB)
+#16 0.517 Requirement already satisfied: numpy>=1.18.0 in ./.local/lib/python3.10/site-packages (from open3d->-r /tmp/requirements-peract2.txt (line 4)) (2.2.6)
+#16 0.545 Collecting dash>=2.6.0 (from open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 0.551   Downloading dash-3.3.0-py3-none-any.whl.metadata (11 kB)
+#16 0.560 Requirement already satisfied: werkzeug>=3.0.0 in ./.local/lib/python3.10/site-packages (from open3d->-r /tmp/requirements-peract2.txt (line 4)) (3.1.5)
+#16 0.580 Collecting flask>=3.0.0 (from open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 0.586   Downloading flask-3.1.2-py3-none-any.whl.metadata (3.2 kB)
+#16 0.599 Collecting nbformat>=5.7.0 (from open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 0.605   Downloading nbformat-5.10.4-py3-none-any.whl.metadata (3.6 kB)
+#16 0.615 Collecting configargparse (from open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 0.620   Downloading configargparse-1.7.1-py3-none-any.whl.metadata (24 kB)
+#16 0.644 Collecting ipywidgets>=8.0.4 (from open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 0.650   Downloading ipywidgets-8.1.8-py3-none-any.whl.metadata (2.4 kB)
+#16 0.660 Collecting addict (from open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 0.666   Downloading addict-2.4.0-py3-none-any.whl.metadata (1.0 kB)
+#16 0.667 Requirement already satisfied: pillow>=9.3.0 in ./.local/lib/python3.10/site-packages (from open3d->-r /tmp/requirements-peract2.txt (line 4)) (12.1.0)
+#16 0.755 Collecting matplotlib>=3 (from open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 0.762   Downloading matplotlib-3.10.8-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (52 kB)
+#16 0.839 Collecting pandas>=1.0 (from open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 0.845   Downloading pandas-2.3.3-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+#16 0.868 Requirement already satisfied: pyyaml>=5.4.1 in ./.local/lib/python3.10/site-packages (from open3d->-r /tmp/requirements-peract2.txt (line 4)) (6.0.3)
+#16 0.920 Collecting scikit-learn>=0.21 (from open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 0.926   Downloading scikit_learn-1.7.2-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (11 kB)
+#16 0.932 Requirement already satisfied: tqdm in ./.local/lib/python3.10/site-packages (from open3d->-r /tmp/requirements-peract2.txt (line 4)) (4.67.1)
+#16 0.941 Collecting pyquaternion (from open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 0.946   Downloading pyquaternion-0.9.9-py3-none-any.whl.metadata (1.4 kB)
+#16 0.987 Collecting plotly>=5.0.0 (from dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 0.993   Downloading plotly-6.5.2-py3-none-any.whl.metadata (8.5 kB)
+#16 0.997 Requirement already satisfied: importlib-metadata in ./.local/lib/python3.10/site-packages (from dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4)) (8.7.1)
+#16 0.998 Requirement already satisfied: typing_extensions>=4.1.1 in ./.local/lib/python3.10/site-packages (from dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4)) (4.15.0)
+#16 0.998 Requirement already satisfied: requests in ./.local/lib/python3.10/site-packages (from dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4)) (2.32.5)
+#16 1.008 Collecting retrying (from dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.014   Downloading retrying-1.4.2-py3-none-any.whl.metadata (5.5 kB)
+#16 1.026 Collecting nest-asyncio (from dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.033   Downloading nest_asyncio-1.6.0-py3-none-any.whl.metadata (2.8 kB)
+#16 1.034 Requirement already satisfied: setuptools in ./.local/lib/python3.10/site-packages (from dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4)) (80.9.0)
+#16 1.042 Collecting blinker>=1.9.0 (from flask>=3.0.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.048   Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+#16 1.060 Collecting click>=8.1.3 (from flask>=3.0.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.066   Downloading click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+#16 1.075 Collecting itsdangerous>=2.2.0 (from flask>=3.0.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.082   Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+#16 1.083 Requirement already satisfied: jinja2>=3.1.2 in ./.local/lib/python3.10/site-packages (from flask>=3.0.0->open3d->-r /tmp/requirements-peract2.txt (line 4)) (3.1.6)
+#16 1.084 Requirement already satisfied: markupsafe>=2.1.1 in ./.local/lib/python3.10/site-packages (from flask>=3.0.0->open3d->-r /tmp/requirements-peract2.txt (line 4)) (3.0.3)
+#16 1.094 Collecting comm>=0.1.3 (from ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.100   Downloading comm-0.2.3-py3-none-any.whl.metadata (3.7 kB)
+#16 1.130 Collecting ipython>=6.1.0 (from ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.137   Downloading ipython-8.38.0-py3-none-any.whl.metadata (5.1 kB)
+#16 1.157 Collecting traitlets>=4.3.1 (from ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.163   Downloading traitlets-5.14.3-py3-none-any.whl.metadata (10 kB)
+#16 1.182 Collecting widgetsnbextension~=4.0.14 (from ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.189   Downloading widgetsnbextension-4.0.15-py3-none-any.whl.metadata (1.6 kB)
+#16 1.203 Collecting jupyterlab_widgets~=3.0.15 (from ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.210   Downloading jupyterlab_widgets-3.0.16-py3-none-any.whl.metadata (20 kB)
+#16 1.222 Collecting decorator (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.228   Downloading decorator-5.2.1-py3-none-any.whl.metadata (3.9 kB)
+#16 1.229 Requirement already satisfied: exceptiongroup in ./.local/lib/python3.10/site-packages (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4)) (1.3.1)
+#16 1.239 Collecting jedi>=0.16 (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.245   Downloading jedi-0.19.2-py2.py3-none-any.whl.metadata (22 kB)
+#16 1.257 Collecting matplotlib-inline (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.264   Downloading matplotlib_inline-0.2.1-py3-none-any.whl.metadata (2.3 kB)
+#16 1.273 Collecting pexpect>4.3 (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.279   Downloading pexpect-4.9.0-py2.py3-none-any.whl.metadata (2.5 kB)
+#16 1.299 Collecting prompt_toolkit<3.1.0,>=3.0.41 (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.305   Downloading prompt_toolkit-3.0.52-py3-none-any.whl.metadata (6.4 kB)
+#16 1.318 Collecting pygments>=2.4.0 (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.324   Downloading pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+#16 1.334 Collecting stack_data (from ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.341   Downloading stack_data-0.6.3-py3-none-any.whl.metadata (18 kB)
+#16 1.354 Collecting wcwidth (from prompt_toolkit<3.1.0,>=3.0.41->ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.361   Downloading wcwidth-0.2.14-py2.py3-none-any.whl.metadata (15 kB)
+#16 1.372 Collecting parso<0.9.0,>=0.8.4 (from jedi>=0.16->ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.379   Downloading parso-0.8.5-py2.py3-none-any.whl.metadata (8.3 kB)
+#16 1.422 Collecting contourpy>=1.0.1 (from matplotlib>=3->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.429   Downloading contourpy-1.3.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.5 kB)
+#16 1.438 Collecting cycler>=0.10 (from matplotlib>=3->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.445   Downloading cycler-0.12.1-py3-none-any.whl.metadata (3.8 kB)
+#16 1.559 Collecting fonttools>=4.22.0 (from matplotlib>=3->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.565   Downloading fonttools-4.61.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (114 kB)
+#16 1.611 Collecting kiwisolver>=1.3.1 (from matplotlib>=3->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.618   Downloading kiwisolver-1.4.9-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl.metadata (6.3 kB)
+#16 1.619 Requirement already satisfied: packaging>=20.0 in ./.local/lib/python3.10/site-packages (from matplotlib>=3->open3d->-r /tmp/requirements-peract2.txt (line 4)) (25.0)
+#16 1.634 Collecting pyparsing>=3 (from matplotlib>=3->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.640   Downloading pyparsing-3.3.1-py3-none-any.whl.metadata (5.6 kB)
+#16 1.650 Collecting python-dateutil>=2.7 (from matplotlib>=3->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.656   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+#16 1.668 Collecting fastjsonschema>=2.15 (from nbformat>=5.7.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.674   Downloading fastjsonschema-2.21.2-py3-none-any.whl.metadata (2.3 kB)
+#16 1.690 Collecting jsonschema>=2.6 (from nbformat>=5.7.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.697   Downloading jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+#16 1.711 Collecting jupyter-core!=5.0.*,>=4.12 (from nbformat>=5.7.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.717   Downloading jupyter_core-5.9.1-py3-none-any.whl.metadata (1.5 kB)
+#16 1.731 Collecting attrs>=22.2.0 (from jsonschema>=2.6->nbformat>=5.7.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.738   Downloading attrs-25.4.0-py3-none-any.whl.metadata (10 kB)
+#16 1.746 Collecting jsonschema-specifications>=2023.03.6 (from jsonschema>=2.6->nbformat>=5.7.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.752   Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+#16 1.768 Collecting referencing>=0.28.4 (from jsonschema>=2.6->nbformat>=5.7.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.775   Downloading referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+#16 1.933 Collecting rpds-py>=0.25.0 (from jsonschema>=2.6->nbformat>=5.7.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.940   Downloading rpds_py-0.30.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.1 kB)
+#16 1.956 Collecting platformdirs>=2.5 (from jupyter-core!=5.0.*,>=4.12->nbformat>=5.7.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.964   Downloading platformdirs-4.5.1-py3-none-any.whl.metadata (12 kB)
+#16 1.993 Collecting pytz>=2020.1 (from pandas>=1.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 1.999   Downloading pytz-2025.2-py2.py3-none-any.whl.metadata (22 kB)
+#16 2.010 Collecting tzdata>=2022.7 (from pandas>=1.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 2.016   Downloading tzdata-2025.3-py2.py3-none-any.whl.metadata (1.4 kB)
+#16 2.024 Collecting ptyprocess>=0.5 (from pexpect>4.3->ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 2.030   Downloading ptyprocess-0.7.0-py2.py3-none-any.whl.metadata (1.3 kB)
+#16 2.059 Collecting narwhals>=1.15.1 (from plotly>=5.0.0->dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 2.065   Downloading narwhals-2.15.0-py3-none-any.whl.metadata (13 kB)
+#16 2.078 Collecting six>=1.5 (from python-dateutil>=2.7->matplotlib>=3->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 2.084   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+#16 2.150 Collecting scipy>=1.8.0 (from scikit-learn>=0.21->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 2.156   Downloading scipy-1.15.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (61 kB)
+#16 2.176 Collecting joblib>=1.2.0 (from scikit-learn>=0.21->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 2.182   Downloading joblib-1.5.3-py3-none-any.whl.metadata (5.5 kB)
+#16 2.190 Collecting threadpoolctl>=3.1.0 (from scikit-learn>=0.21->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 2.196   Downloading threadpoolctl-3.6.0-py3-none-any.whl.metadata (13 kB)
+#16 2.206 Requirement already satisfied: zipp>=3.20 in ./.local/lib/python3.10/site-packages (from importlib-metadata->dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4)) (3.23.0)
+#16 2.210 Requirement already satisfied: charset_normalizer<4,>=2 in ./.local/lib/python3.10/site-packages (from requests->dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4)) (3.4.4)
+#16 2.211 Requirement already satisfied: idna<4,>=2.5 in ./.local/lib/python3.10/site-packages (from requests->dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4)) (3.11)
+#16 2.211 Requirement already satisfied: urllib3<3,>=1.21.1 in ./.local/lib/python3.10/site-packages (from requests->dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4)) (2.6.3)
+#16 2.211 Requirement already satisfied: certifi>=2017.4.17 in ./.local/lib/python3.10/site-packages (from requests->dash>=2.6.0->open3d->-r /tmp/requirements-peract2.txt (line 4)) (2026.1.4)
+#16 2.228 Collecting executing>=1.2.0 (from stack_data->ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 2.234   Downloading executing-2.2.1-py2.py3-none-any.whl.metadata (8.9 kB)
+#16 2.265 Collecting asttokens>=2.1.0 (from stack_data->ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 2.271   Downloading asttokens-3.0.1-py3-none-any.whl.metadata (4.9 kB)
+#16 2.279 Collecting pure-eval (from stack_data->ipython>=6.1.0->ipywidgets>=8.0.4->open3d->-r /tmp/requirements-peract2.txt (line 4))
+#16 2.285   Downloading pure_eval-0.2.3-py3-none-any.whl.metadata (6.3 kB)
+#16 2.298 Downloading open3d-0.19.0-cp310-cp310-manylinux_2_31_x86_64.whl (447.7 MB)
+#16 21.23    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 447.7/447.7 MB 22.6 MB/s  0:00:18
+#16 21.23 Downloading poetry_core-2.3.0-py3-none-any.whl (340 kB)
+#16 21.26 Downloading dash-3.3.0-py3-none-any.whl (7.9 MB)
+#16 21.58    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.9/7.9 MB 24.4 MB/s  0:00:00
+#16 21.59 Downloading flask-3.1.2-py3-none-any.whl (103 kB)
+#16 21.60 Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+#16 21.60 Downloading click-8.3.1-py3-none-any.whl (108 kB)
+#16 21.61 Downloading ipywidgets-8.1.8-py3-none-any.whl (139 kB)
+#16 21.65 Downloading jupyterlab_widgets-3.0.16-py3-none-any.whl (914 kB)
+#16 21.69    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 914.9/914.9 kB 22.5 MB/s  0:00:00
+#16 21.70 Downloading widgetsnbextension-4.0.15-py3-none-any.whl (2.2 MB)
+#16 21.79    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 23.9 MB/s  0:00:00
+#16 21.80 Downloading comm-0.2.3-py3-none-any.whl (7.3 kB)
+#16 21.81 Downloading ipython-8.38.0-py3-none-any.whl (831 kB)
+#16 21.84    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 831.8/831.8 kB 28.5 MB/s  0:00:00
+#16 21.84 Downloading prompt_toolkit-3.0.52-py3-none-any.whl (391 kB)
+#16 21.86 Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+#16 21.87 Downloading jedi-0.19.2-py2.py3-none-any.whl (1.6 MB)
+#16 21.92    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 28.6 MB/s  0:00:00
+#16 21.93 Downloading parso-0.8.5-py2.py3-none-any.whl (106 kB)
+#16 21.94 Downloading matplotlib-3.10.8-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (8.7 MB)
+#16 22.26    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.7/8.7 MB 27.0 MB/s  0:00:00
+#16 22.27 Downloading contourpy-1.3.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (325 kB)
+#16 22.28 Downloading cycler-0.12.1-py3-none-any.whl (8.3 kB)
+#16 22.29 Downloading fonttools-4.61.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.9 MB)
+#16 22.45    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.9/4.9 MB 30.8 MB/s  0:00:00
+#16 22.46 Downloading kiwisolver-1.4.9-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (1.6 MB)
+#16 22.51    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 32.2 MB/s  0:00:00
+#16 22.51 Downloading nbformat-5.10.4-py3-none-any.whl (78 kB)
+#16 22.52 Downloading fastjsonschema-2.21.2-py3-none-any.whl (24 kB)
+#16 22.55 Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+#16 22.60 Downloading attrs-25.4.0-py3-none-any.whl (67 kB)
+#16 22.61 Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+#16 22.61 Downloading jupyter_core-5.9.1-py3-none-any.whl (29 kB)
+#16 22.62 Downloading pandas-2.3.3-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.8 MB)
+#16 23.03    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.8/12.8 MB 31.6 MB/s  0:00:00
+#16 23.03 Downloading pexpect-4.9.0-py2.py3-none-any.whl (63 kB)
+#16 23.04 Downloading platformdirs-4.5.1-py3-none-any.whl (18 kB)
+#16 23.05 Downloading plotly-6.5.2-py3-none-any.whl (9.9 MB)
+#16 23.37    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.9/9.9 MB 30.6 MB/s  0:00:00
+#16 23.38 Downloading narwhals-2.15.0-py3-none-any.whl (432 kB)
+#16 23.40 Downloading ptyprocess-0.7.0-py2.py3-none-any.whl (13 kB)
+#16 23.41 Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+#16 23.44    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 31.0 MB/s  0:00:00
+#16 23.45 Downloading pyparsing-3.3.1-py3-none-any.whl (121 kB)
+#16 23.46 Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+#16 23.47 Downloading pytz-2025.2-py2.py3-none-any.whl (509 kB)
+#16 23.49 Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+#16 23.50 Downloading rpds_py-0.30.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (390 kB)
+#16 23.52 Downloading scikit_learn-1.7.2-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (9.7 MB)
+#16 23.85    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.7/9.7 MB 28.6 MB/s  0:00:00
+#16 23.86 Downloading joblib-1.5.3-py3-none-any.whl (309 kB)
+#16 23.88 Downloading scipy-1.15.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (37.7 MB)
+#16 26.36    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 37.7/37.7 MB 15.1 MB/s  0:00:02
+#16 26.36 Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+#16 26.37 Downloading threadpoolctl-3.6.0-py3-none-any.whl (18 kB)
+#16 26.38 Downloading traitlets-5.14.3-py3-none-any.whl (85 kB)
+#16 26.39 Downloading tzdata-2025.3-py2.py3-none-any.whl (348 kB)
+#16 26.41 Downloading addict-2.4.0-py3-none-any.whl (3.8 kB)
+#16 26.42 Downloading configargparse-1.7.1-py3-none-any.whl (25 kB)
+#16 26.43 Downloading decorator-5.2.1-py3-none-any.whl (9.2 kB)
+#16 26.44 Downloading matplotlib_inline-0.2.1-py3-none-any.whl (9.5 kB)
+#16 26.44 Downloading nest_asyncio-1.6.0-py3-none-any.whl (5.2 kB)
+#16 26.45 Downloading pyquaternion-0.9.9-py3-none-any.whl (14 kB)
+#16 26.46 Downloading retrying-1.4.2-py3-none-any.whl (10 kB)
+#16 26.46 Downloading stack_data-0.6.3-py3-none-any.whl (24 kB)
+#16 26.47 Downloading asttokens-3.0.1-py3-none-any.whl (27 kB)
+#16 26.48 Downloading executing-2.2.1-py2.py3-none-any.whl (28 kB)
+#16 26.48 Downloading pure_eval-0.2.3-py3-none-any.whl (11 kB)
+#16 26.49 Downloading wcwidth-0.2.14-py2.py3-none-any.whl (37 kB)
+#16 27.21 Installing collected packages: pytz, pure-eval, ptyprocess, fastjsonschema, addict, widgetsnbextension, wcwidth, tzdata, traitlets, threadpoolctl, six, scipy, rpds-py, retrying, pyquaternion, pyparsing, pygments, poetry-core, platformdirs, pexpect, parso, nest-asyncio, narwhals, kiwisolver, jupyterlab_widgets, joblib, itsdangerous, fonttools, executing, decorator, cycler, contourpy, configargparse, comm, click, blinker, attrs, asttokens, stack_data, scikit-learn, referencing, python-dateutil, prompt_toolkit, plotly, matplotlib-inline, jupyter-core, jedi, flask, pandas, matplotlib, jsonschema-specifications, ipython, dash, jsonschema, ipywidgets, nbformat, open3d
+#16 38.50 
+#16 38.51 Successfully installed addict-2.4.0 asttokens-3.0.1 attrs-25.4.0 blinker-1.9.0 click-8.3.1 comm-0.2.3 configargparse-1.7.1 contourpy-1.3.2 cycler-0.12.1 dash-3.3.0 decorator-5.2.1 executing-2.2.1 fastjsonschema-2.21.2 flask-3.1.2 fonttools-4.61.1 ipython-8.38.0 ipywidgets-8.1.8 itsdangerous-2.2.0 jedi-0.19.2 joblib-1.5.3 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 jupyter-core-5.9.1 jupyterlab_widgets-3.0.16 kiwisolver-1.4.9 matplotlib-3.10.8 matplotlib-inline-0.2.1 narwhals-2.15.0 nbformat-5.10.4 nest-asyncio-1.6.0 open3d-0.19.0 pandas-2.3.3 parso-0.8.5 pexpect-4.9.0 platformdirs-4.5.1 plotly-6.5.2 poetry-core-2.3.0 prompt_toolkit-3.0.52 ptyprocess-0.7.0 pure-eval-0.2.3 pygments-2.19.2 pyparsing-3.3.1 pyquaternion-0.9.9 python-dateutil-2.9.0.post0 pytz-2025.2 referencing-0.37.0 retrying-1.4.2 rpds-py-0.30.0 scikit-learn-1.7.2 scipy-1.15.3 six-1.17.0 stack_data-0.6.3 threadpoolctl-3.6.0 traitlets-5.14.3 tzdata-2025.3 wcwidth-0.2.14 widgetsnbextension-4.0.15
+#16 DONE 39.2s
+
+#17 [peract2 5/8] RUN wget -q https://www.coppeliarobotics.com/files/V4_1_0/CoppeliaSim_Edu_V4_1_0_Ubuntu20_04.tar.xz     && tar -xf CoppeliaSim_Edu_V4_1_0_Ubuntu20_04.tar.xz     && rm CoppeliaSim_Edu_V4_1_0_Ubuntu20_04.tar.xz
+#17 DONE 17.0s
+
+#18 [peract2 6/8] RUN git clone https://github.com/markusgrotz/PyRep.git     && cd PyRep     && pip3 install --no-cache-dir -r requirements.txt     && pip3 install --no-cache-dir --no-build-isolation -e .
+#18 0.189 Cloning into 'PyRep'...
+#18 6.150 Defaulting to user installation because normal site-packages is not writeable
+#18 6.220 Requirement already satisfied: numpy in /home/iw/.local/lib/python3.10/site-packages (from -r requirements.txt (line 1)) (2.2.6)
+#18 6.354 Collecting cffi==1.14.2 (from -r requirements.txt (line 2))
+#18 6.409   Downloading cffi-1.14.2.tar.gz (470 kB)
+#18 6.492   Installing build dependencies: started
+#18 7.141   Installing build dependencies: finished with status 'done'
+#18 7.142   Getting requirements to build wheel: started
+#18 7.338   Getting requirements to build wheel: finished with status 'done'
+#18 7.339   Preparing metadata (pyproject.toml): started
+#18 7.475   Preparing metadata (pyproject.toml): finished with status 'done'
+#18 7.485 Collecting pycparser (from cffi==1.14.2->-r requirements.txt (line 2))
+#18 7.491   Downloading pycparser-2.23-py3-none-any.whl.metadata (993 bytes)
+#18 7.500 Downloading pycparser-2.23-py3-none-any.whl (118 kB)
+#18 7.510 Building wheels for collected packages: cffi
+#18 7.511   Building wheel for cffi (pyproject.toml): started
+#18 8.929   Building wheel for cffi (pyproject.toml): finished with status 'done'
+#18 8.929   Created wheel for cffi: filename=cffi-1.14.2-cp310-cp310-linux_x86_64.whl size=379329 sha256=5a0b003ad117155a572a1a738f4b14a4a0be1880e1d0cf9e69aa563736feab59
+#18 8.929   Stored in directory: /tmp/pip-ephem-wheel-cache-8t8ilmd6/wheels/4e/60/de/b1655dca98eb75e541d1cf805bf68f85bc4ee8f60cea7def4c
+#18 8.930 Successfully built cffi
+#18 9.167 Installing collected packages: pycparser, cffi
+#18 9.293 
+#18 9.301 Successfully installed cffi-1.14.2 pycparser-2.23
+#18 9.543 Defaulting to user installation because normal site-packages is not writeable
+#18 9.586 Obtaining file:///home/iw/PyRep
+#18 9.587   Checking if build backend supports build_editable: started
+#18 9.660   Checking if build backend supports build_editable: finished with status 'done'
+#18 9.661   Preparing editable metadata (pyproject.toml): started
+#18 9.907   Preparing editable metadata (pyproject.toml): finished with status 'done'
+#18 9.914 Building wheels for collected packages: PyRep
+#18 9.914   Building editable for PyRep (pyproject.toml): started
+#18 13.80   Building editable for PyRep (pyproject.toml): finished with status 'done'
+#18 13.80   Created wheel for PyRep: filename=pyrep-4.1.0.3-0.editable-cp310-cp310-linux_x86_64.whl size=3626 sha256=60e06081af727ebb7c1ee2257cf7d58f8cff56f226a320cec2f882c137f79ae7
+#18 13.80   Stored in directory: /tmp/pip-ephem-wheel-cache-btlfy1xh/wheels/af/ac/9b/f39bbfb377ed30a25e0f703cef3c00bc99f0c65b9bd327e389
+#18 13.80 Successfully built PyRep
+#18 14.05 Installing collected packages: PyRep
+#18 14.09 Successfully installed PyRep-4.1.0.3
+#18 DONE 14.3s
+
+#19 [peract2 7/8] RUN git clone https://github.com/markusgrotz/RLBench.git     && cd RLBench     && pip3 install --no-cache-dir -r requirements.txt     && pip3 install --no-cache-dir --no-build-isolation -e .
+#19 0.170 Cloning into 'RLBench'...
+#19 37.49 Updating files:  60% (6180/10244)Updating files:  61% (6249/10244)Updating files:  62% (6352/10244)Updating files:  63% (6454/10244)Updating files:  64% (6557/10244)Updating files:  65% (6659/10244)Updating files:  66% (6762/10244)Updating files:  67% (6864/10244)Updating files:  68% (6966/10244)Updating files:  69% (7069/10244)Updating files:  70% (7171/10244)Updating files:  71% (7274/10244)Updating files:  72% (7376/10244)Updating files:  73% (7479/10244)Updating files:  74% (7581/10244)Updating files:  75% (7683/10244)Updating files:  76% (7786/10244)Updating files:  77% (7888/10244)Updating files:  78% (7991/10244)Updating files:  79% (8093/10244)Updating files:  80% (8196/10244)Updating files:  81% (8298/10244)Updating files:  82% (8401/10244)Updating files:  83% (8503/10244)Updating files:  84% (8605/10244)Updating files:  85% (8708/10244)Updating files:  86% (8810/10244)Updating files:  87% (8913/10244)Updating files:  88% (9015/10244)Updating files:  89% (9118/10244)Updating files:  90% (9220/10244)Updating files:  91% (9323/10244)Updating files:  92% (9425/10244)Updating files:  93% (9527/10244)Updating files:  94% (9630/10244)Updating files:  95% (9732/10244)Updating files:  96% (9835/10244)Updating files:  97% (9937/10244)Updating files:  98% (10040/10244)Updating files:  99% (10142/10244)Updating files: 100% (10244/10244)Updating files: 100% (10244/10244), done.
+#19 38.28 Defaulting to user installation because normal site-packages is not writeable
+#19 38.34 Requirement already satisfied: numpy in /home/iw/.local/lib/python3.10/site-packages (from -r requirements.txt (line 1)) (2.2.6)
+#19 38.34 Requirement already satisfied: Pillow in /home/iw/.local/lib/python3.10/site-packages (from -r requirements.txt (line 2)) (12.1.0)
+#19 38.34 Requirement already satisfied: pyquaternion in /home/iw/.local/lib/python3.10/site-packages (from -r requirements.txt (line 3)) (0.9.9)
+#19 38.39 Collecting html-testRunner (from -r requirements.txt (line 4))
+#19 38.44   Downloading html_testRunner-1.2.1-py2.py3-none-any.whl.metadata (2.1 kB)
+#19 38.44 Requirement already satisfied: setuptools in /home/iw/.local/lib/python3.10/site-packages (from -r requirements.txt (line 5)) (80.9.0)
+#19 38.46 Collecting natsort (from -r requirements.txt (line 6))
+#19 38.46   Downloading natsort-8.4.0-py3-none-any.whl.metadata (21 kB)
+#19 38.48 Requirement already satisfied: Jinja2>=2.10.1 in /home/iw/.local/lib/python3.10/site-packages (from html-testRunner->-r requirements.txt (line 4)) (3.1.6)
+#19 38.49 Requirement already satisfied: MarkupSafe>=2.0 in /home/iw/.local/lib/python3.10/site-packages (from Jinja2>=2.10.1->html-testRunner->-r requirements.txt (line 4)) (3.0.3)
+#19 38.49 Downloading html_testRunner-1.2.1-py2.py3-none-any.whl (11 kB)
+#19 38.50 Downloading natsort-8.4.0-py3-none-any.whl (38 kB)
+#19 38.75 Installing collected packages: natsort, html-testRunner
+#19 38.80 
+#19 38.81 Successfully installed html-testRunner-1.2.1 natsort-8.4.0
+#19 39.01 Defaulting to user installation because normal site-packages is not writeable
+#19 39.05 Obtaining file:///home/iw/RLBench
+#19 39.05   Checking if build backend supports build_editable: started
+#19 39.12   Checking if build backend supports build_editable: finished with status 'done'
+#19 39.12   Preparing editable metadata (pyproject.toml): started
+#19 39.20   Preparing editable metadata (pyproject.toml): finished with status 'done'
+#19 39.36 Collecting Pillow<10.0.0,>=9.2.0 (from rlbench==1.2.1)
+#19 39.40   Downloading Pillow-9.5.0-cp310-cp310-manylinux_2_28_x86_64.whl.metadata (9.5 kB)
+#19 39.59 Collecting click-prompt<0.6.0,>=0.5.1 (from rlbench==1.2.1)
+#19 39.78   Downloading click_prompt-0.5.1-py3-none-any.whl.metadata (2.6 kB)
+#19 39.88 Collecting numpy<2.0.0,>=1.23.3 (from rlbench==1.2.1)
+#19 39.88   Downloading numpy-1.26.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (61 kB)
+#19 39.89 Requirement already satisfied: pyquaternion<0.10.0,>=0.9.9 in /home/iw/.local/lib/python3.10/site-packages (from rlbench==1.2.1) (0.9.9)
+#19 39.90 Collecting rich-click<2.0.0,>=1.8.3 (from rlbench==1.2.1)
+#19 39.91   Downloading rich_click-1.9.5-py3-none-any.whl.metadata (8.7 kB)
+#19 39.91 Requirement already satisfied: click>=8.0.4 in /home/iw/.local/lib/python3.10/site-packages (from click-prompt<0.6.0,>=0.5.1->rlbench==1.2.1) (8.3.1)
+#19 39.92 Collecting questionary<2.0.0,>=1.10.0 (from click-prompt<0.6.0,>=0.5.1->rlbench==1.2.1)
+#19 39.92   Downloading questionary-1.10.0-py3-none-any.whl.metadata (5.7 kB)
+#19 39.93 Requirement already satisfied: prompt_toolkit<4.0,>=2.0 in /home/iw/.local/lib/python3.10/site-packages (from questionary<2.0.0,>=1.10.0->click-prompt<0.6.0,>=0.5.1->rlbench==1.2.1) (3.0.52)
+#19 39.93 Requirement already satisfied: wcwidth in /home/iw/.local/lib/python3.10/site-packages (from prompt_toolkit<4.0,>=2.0->questionary<2.0.0,>=1.10.0->click-prompt<0.6.0,>=0.5.1->rlbench==1.2.1) (0.2.14)
+#19 39.96 Collecting rich>=12 (from rich-click<2.0.0,>=1.8.3->rlbench==1.2.1)
+#19 39.96   Downloading rich-14.2.0-py3-none-any.whl.metadata (18 kB)
+#19 39.97 Requirement already satisfied: typing-extensions>=4 in /home/iw/.local/lib/python3.10/site-packages (from rich-click<2.0.0,>=1.8.3->rlbench==1.2.1) (4.15.0)
+#19 39.98 Collecting markdown-it-py>=2.2.0 (from rich>=12->rich-click<2.0.0,>=1.8.3->rlbench==1.2.1)
+#19 39.98   Downloading markdown_it_py-4.0.0-py3-none-any.whl.metadata (7.3 kB)
+#19 39.98 Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /home/iw/.local/lib/python3.10/site-packages (from rich>=12->rich-click<2.0.0,>=1.8.3->rlbench==1.2.1) (2.19.2)
+#19 39.99 Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=12->rich-click<2.0.0,>=1.8.3->rlbench==1.2.1)
+#19 40.00   Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+#19 40.01 Downloading click_prompt-0.5.1-py3-none-any.whl (5.6 kB)
+#19 40.01 Downloading numpy-1.26.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.2 MB)
+#19 40.41    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 18.2/18.2 MB 45.8 MB/s  0:00:00
+#19 40.42 Downloading Pillow-9.5.0-cp310-cp310-manylinux_2_28_x86_64.whl (3.4 MB)
+#19 40.51    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.4/3.4 MB 38.0 MB/s  0:00:00
+#19 40.52 Downloading questionary-1.10.0-py3-none-any.whl (31 kB)
+#19 40.52 Downloading rich_click-1.9.5-py3-none-any.whl (70 kB)
+#19 40.53 Downloading rich-14.2.0-py3-none-any.whl (243 kB)
+#19 40.56 Downloading markdown_it_py-4.0.0-py3-none-any.whl (87 kB)
+#19 40.56 Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+#19 40.58 Building wheels for collected packages: rlbench
+#19 40.59   Building editable for rlbench (pyproject.toml): started
+#19 40.75   Building editable for rlbench (pyproject.toml): finished with status 'done'
+#19 40.75   Created wheel for rlbench: filename=rlbench-1.2.1-py3-none-any.whl size=11062 sha256=8bd4f1ff0b9297776c6971413493fc49c2bcd54ccc9f95c9d5a505ffb441706d
+#19 40.75   Stored in directory: /tmp/pip-ephem-wheel-cache-bzw4aoc5/wheels/51/39/e6/7b26d30e56850e9113ba1e7b3965fcf8ae8f6f73ee12c33679
+#19 40.75 Successfully built rlbench
+#19 41.00 Installing collected packages: Pillow, numpy, mdurl, questionary, markdown-it-py, rich, click-prompt, rich-click, rlbench
+#19 41.00   Attempting uninstall: Pillow
+#19 41.00     Found existing installation: pillow 12.1.0
+#19 41.02     Uninstalling pillow-12.1.0:
+#19 41.11       Successfully uninstalled pillow-12.1.0
+#19 41.23   Attempting uninstall: numpy
+#19 41.23     Found existing installation: numpy 2.2.6
+#19 41.27     Uninstalling numpy-2.2.6:
+#19 42.31       Successfully uninstalled numpy-2.2.6
+#19 43.45 
+#19 43.46 Successfully installed Pillow-9.5.0 click-prompt-0.5.1 markdown-it-py-4.0.0 mdurl-0.1.2 numpy-1.26.4 questionary-1.10.0 rich-14.2.0 rich-click-1.9.5 rlbench-1.2.1
+#19 DONE 43.8s
+
+#20 [peract2 8/8] WORKDIR /home/iw
+#20 DONE 0.1s
+
+#21 exporting to image
+#21 exporting layers
+#21 exporting layers 29.9s done
+#21 exporting manifest sha256:fe43cc90434423e7de61c0f4c1f370a35bff6fed351e3a0ff8e475759c53453e 0.0s done
+#21 exporting config sha256:fa2dd86dbfd6b15ebd2a39f6f7d55ac5a19b5784071e57bcefedb450234d22af 0.0s done
+#21 exporting attestation manifest sha256:0e362024935152088c668e0b9b52bebe105534c0adfc8a1459340508e9fb8700 0.1s done
+#21 exporting manifest list sha256:50d699d18abb9b5e0e080189688376d9b72a29f27648c606eb4ef85d49fecb99
+#21 exporting manifest list sha256:50d699d18abb9b5e0e080189688376d9b72a29f27648c606eb4ef85d49fecb99 0.0s done
+#21 naming to docker.io/library/3dfa-peract2:latest done
+#21 unpacking to docker.io/library/3dfa-peract2:latest
+#21 unpacking to docker.io/library/3dfa-peract2:latest 8.5s done
+#21 DONE 38.5s
+
+#22 resolving provenance for metadata file
+#22 DONE 0.0s
+ Image 3dfa-peract2:latest Built 
+ Container 3d_flowmatch_actor-peract2-run-848c138ad1ba Creating 
+ Container 3d_flowmatch_actor-peract2-run-848c138ad1ba Created 
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.0
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+*************************
+** DEPRECATION NOTICE! **
+*************************
+THIS IMAGE IS DEPRECATED and is scheduled for DELETION.
+    https://gitlab.com/nvidia/container-images/cuda/blob/master/doc/support-policy.md
+

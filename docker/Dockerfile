@@ -67,6 +67,7 @@ ARG GROUP_ID
 USER root
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    libffi-dev \
     libxcb-xinerama0 \
     libxkbcommon-x11-0 \
     libxcb-cursor0 \
@@ -88,8 +89,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 USER ${USER_NAME}
 WORKDIR /home/${USER_NAME}
 
-RUN pip3 install --no-cache-dir open3d
+# PerAct2 Python dependencies
+COPY --chown=${USER_NAME}:${USER_NAME} docker/requirements-peract2.txt /tmp/requirements-peract2.txt
+RUN pip3 install --no-cache-dir -r /tmp/requirements-peract2.txt
 
+# CoppeliaSim
 RUN wget -q https://www.coppeliarobotics.com/files/V4_1_0/CoppeliaSim_Edu_V4_1_0_Ubuntu20_04.tar.xz \
     && tar -xf CoppeliaSim_Edu_V4_1_0_Ubuntu20_04.tar.xz \
     && rm CoppeliaSim_Edu_V4_1_0_Ubuntu20_04.tar.xz
@@ -98,15 +102,17 @@ ENV COPPELIASIM_ROOT=/home/${USER_NAME}/CoppeliaSim_Edu_V4_1_0_Ubuntu20_04
 ENV LD_LIBRARY_PATH="${COPPELIASIM_ROOT}:${LD_LIBRARY_PATH}"
 ENV QT_QPA_PLATFORM_PLUGIN_PATH="${COPPELIASIM_ROOT}"
 
+# PyRep
 RUN git clone https://github.com/markusgrotz/PyRep.git \
     && cd PyRep \
     && pip3 install --no-cache-dir -r requirements.txt \
-    && pip3 install --no-cache-dir -e .
+    && pip3 install --no-cache-dir --no-build-isolation -e .
 
+# RLBench
 RUN git clone https://github.com/markusgrotz/RLBench.git \
     && cd RLBench \
     && pip3 install --no-cache-dir -r requirements.txt \
-    && pip3 install --no-cache-dir -e .
+    && pip3 install --no-cache-dir --no-build-isolation -e .
 
 WORKDIR /home/${USER_NAME}
 
