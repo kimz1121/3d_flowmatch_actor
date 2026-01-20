@@ -4,6 +4,7 @@
 x-common: &common
   stdin_open: true
   tty: true
+  shm_size: '16gb'
   deploy:
     resources:
       reservations:
