@@ -148,6 +148,7 @@ class DenoiseActor(nn.Module):
     def compute_trajectory(self, trajectory_mask,
                            rgb3d, rgb2d, pcd, instruction, proprio):
         # Encode observations, states, instructions
+        # fixed..? input??
         fixed_inputs = self.encode_inputs(
             rgb3d, rgb2d, pcd, instruction, proprio
         )
@@ -157,7 +158,7 @@ class DenoiseActor(nn.Module):
         trajectory = torch.randn(
             size=tuple(trajectory_mask.shape) + (out_dim,),
             device=trajectory_mask.device
-        )
+        )# initialize with noise
         trajectory = self.conditional_sample(
             trajectory,
             device=trajectory_mask.device,
@@ -334,6 +335,9 @@ class DenoiseActor(nn.Module):
             pcd: (B, num_3d_cameras, 3, H, W) in world coordinates
             instruction: tokenized text instruction
             proprio: (B, nhist, nhand, 3+4+X)
+            
+            - 정보
+                -> nhist = num_history of proprio steps
 
         Note:
             The input rotation is expressed either as:

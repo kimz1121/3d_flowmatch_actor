@@ -109,12 +109,12 @@ class Actioner:
         """
         return self._policy(
             None,
-            torch.full([1, prediction_len, 1], False).cuda(non_blocking=True),
-            rgbs,
-            None,
-            pcds,
-            self._instr,
-            gripper[:, :, None, :7],
+            torch.full([1, prediction_len, 1], False).cuda(non_blocking=True),# a mask filled with False
+            rgbs,# rgb3d
+            None,# rgb2d, ignored
+            pcds,# Point cloud data
+            self._instr,# instruction
+            gripper[:, :, None, :7],# proprioception?
             run_inference=True
         ).view(1, prediction_len, 8)
 
