@@ -67,7 +67,7 @@ ARG GROUP_ID
 USER root
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    unzip
+    unzip \
     libffi-dev \
     libxcb-xinerama0 \
     libxkbcommon-x11-0 \
