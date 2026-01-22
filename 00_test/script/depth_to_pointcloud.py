@@ -1,3 +1,4 @@
+import torch
 import zarr
 import matplotlib.pyplot as plt
 import os
@@ -9,11 +10,11 @@ val = zarr.open("Peract2_zarr/val.zarr", mode='r')
 print(train.tree())
 
 depth = train['depth']  # zarr array
-extrinsic = train['extrinsics']  # zarr array
-intrinsic = train['intrinsics']  # zarr array
+extrinsics = train['extrinsics']  # zarr array
+intrinsics = train['intrinsics']  # zarr array
 print("depth shape:", depth.shape)
-print("extrinsic shape:", extrinsic.shape)
-print("intrinsic shape:", intrinsic.shape)
+print("extrinsic shape:", extrinsics.shape)
+print("intrinsic shape:", intrinsics.shape)
 # 첫 번째 프레임, 첫 번째 카메라
 freame_idx = 0
 camera_idx = 0
@@ -23,19 +24,24 @@ batch_size = 1
 num_cameras = 3
 
 depth_img = depth[freame_idx]  # shape: (256, 256)
-extrinsic = extrinsic[freame_idx]  # shape: (256, 256)
-intrinsic = intrinsic[freame_idx]  # shape: (256, 256)
+extrinsics = extrinsics[freame_idx]  # shape: (256, 256)
+intrinsics = intrinsics[freame_idx]  # shape: (256, 256)
 
 depth_img = depth_img.reshape(batch_size, num_cameras, height, width)
-extrinsic = extrinsic.reshape(batch_size, num_cameras, 4, 4)
-intrinsic = intrinsic.reshape(batch_size, num_cameras, 3, 3)
+extrinsics = extrinsics.reshape(batch_size, num_cameras, 4, 4)
+intrinsics = intrinsics.reshape(batch_size, num_cameras, 3, 3)
 
 print("depth_img shape:", depth_img.shape)
-print("extrinsic shape:", extrinsic.shape)
-print("intrinsic shape:", intrinsic.shape)
+print("extrinsic shape:", extrinsics.shape)
+print("intrinsic shape:", intrinsics.shape)
 
 depth2cloud = RLBenchDepth2Cloud((256, 256))
 
-pointcloud = depth2cloud(depth=depth_img, extrinsic=extrinsic, intrinsic=intrinsic)
+# convret numpy arrays to torch tensors
+depth_img = torch.from_numpy(depth_img).float().cuda(non_blocking=True)
+extrinsics = torch.from_numpy(extrinsics).float().cuda(non_blocking=True)
+intrinsics = torch.from_numpy(intrinsics).float().cuda(non_blocking=True)
+
+pointcloud = depth2cloud(depth=depth_img, extrinsics=extrinsics, intrinsics=intrinsics)
 
 print("pointcloud shape:", pointcloud.shape)
