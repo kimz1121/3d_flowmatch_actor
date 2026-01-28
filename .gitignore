@@ -48,4 +48,7 @@ zarr_datasets
 peract_test.zip
 
 peract2_test/
-Peract2_zarr
+Peract2_zarr/
+
+peract_test/
+Peract_packaged/

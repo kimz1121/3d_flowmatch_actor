@@ -45,3 +45,5 @@ intrinsics = torch.from_numpy(intrinsics).float().cuda(non_blocking=True)
 pointcloud = depth2cloud(depth=depth_img, extrinsics=extrinsics, intrinsics=intrinsics)
 
 print("pointcloud shape:", pointcloud.shape)
+
+

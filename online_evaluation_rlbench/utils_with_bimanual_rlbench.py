@@ -123,6 +123,7 @@ class Actioner:
             pcds,
             self._instr,
             gripper.unflatten(-1, (2, -1)),  # (1, nhist, nhand=2, 8)
+            # = Proprioception
             run_inference=True
         )
 
