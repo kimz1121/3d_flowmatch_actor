@@ -4,6 +4,7 @@ import random
 import numpy as np
 
 from modeling.encoder.multimodal.encoder3d import Encoder
+from modeling.encoder.text import fetch_tokenizers
 from utils.depth2cloud.rlbench import RLBenchDepth2Cloud
 from datasets.rlbench import Peract2Dataset
 from torch.utils.data import DataLoader
@@ -13,6 +14,7 @@ from utils.depth2cloud import fetch_depth2cloud
 class TesterEncoder:
     def __init__(self,
                  # Encoder arguments
+                 device = "cuda",
                  backbone="clip",
                  finetune_backbone=False,
                  finetune_text_encoder=False,
@@ -42,7 +44,9 @@ class TesterEncoder:
             fps_subsampling_factor=fps_subsampling_factor,
             finetune_backbone=finetune_backbone,
             finetune_text_encoder=finetune_text_encoder
-        )
+        ).to(device)
+
+        self.toknizer = fetch_tokenizers(backbone)
 
     # rgb2d 입력은 이번 버전에서 구현 되지 않았음을 주석에서 확인할 수 있음.
     # modeling/encoder/multimodal/encoder3d.py
@@ -50,17 +54,28 @@ class TesterEncoder:
         # 2D camera features (don't support mixed cameras in this release)
         # rgb2d_feats = None
 
+    def tokenize(self, instruction):
+        tokens = self.toknizer(instruction)
+        # GPU로 이동
+        if isinstance(tokens, torch.Tensor):
+            tokens = tokens.to('cuda')
+        elif hasattr(tokens, 'input_ids'):  # BatchEncoding인 경우
+            tokens = tokens.to('cuda')
+        return tokens
+
     def encode_inputs(self, rgb3d, rgb2d, pcd, instruction, proprio):
+        instruction_token = self.tokenize(instruction)
         fixed_inputs = self.encoder(
-            rgb3d, rgb2d, pcd, instruction,
+            rgb3d, rgb2d, pcd, instruction_token,
             proprio.flatten(1, 2)
         )
         return fixed_inputs
 
     # 3D feature에, Clip을 통한 semantic feature를 입히는 과정
     def encode_clip(self, rgb3d, rgb2d, pcd, instruction):
+        instruction_token = self.tokenize(instruction)
         rgb3d_feats, rgb2d_feats, pcd, instr_feats = self.encoder.encode_clip(
-            rgb3d=rgb3d, rgb2d=rgb2d, pcd=pcd, text=instruction
+            rgb3d=rgb3d, rgb2d=rgb2d, pcd=pcd, text=instruction_token
         )
         return rgb3d_feats, rgb2d_feats, pcd, instr_feats
 
