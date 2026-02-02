@@ -7,7 +7,8 @@ from modeling.encoder.multimodal.encoder3d import Encoder
 from utils.depth2cloud.rlbench import RLBenchDepth2Cloud
 from datasets.rlbench import Peract2Dataset
 from torch.utils.data import DataLoader
-
+from utils.data_preprocessors import fetch_data_preprocessor
+from utils.depth2cloud import fetch_depth2cloud
 
 class TesterEncoder:
     def __init__(self,
@@ -43,14 +44,25 @@ class TesterEncoder:
             finetune_text_encoder=finetune_text_encoder
         )
 
+    # rgb2d 입력은 이번 버전에서 구현 되지 않았음을 주석에서 확인할 수 있음.
+    # modeling/encoder/multimodal/encoder3d.py
+        # line 139~140
+        # 2D camera features (don't support mixed cameras in this release)
+        # rgb2d_feats = None
+
     def encode_inputs(self, rgb3d, rgb2d, pcd, instruction, proprio):
         fixed_inputs = self.encoder(
             rgb3d, rgb2d, pcd, instruction,
             proprio.flatten(1, 2)
         )
-        # Query trajectory (for relative trajectory prediction)
-        query_trajectory = proprio[:, -1:]
-        return (query_trajectory,) + fixed_inputs
+        return fixed_inputs
+
+    # 3D feature에, Clip을 통한 semantic feature를 입히는 과정
+    def encode_clip(self, rgb3d, rgb2d, pcd, instruction):
+        rgb3d_feats, rgb2d_feats, pcd, instr_feats = self.encoder.encode_clip(
+            rgb3d=rgb3d, rgb2d=rgb2d, pcd=pcd, text=instruction
+        )
+        return rgb3d_feats, rgb2d_feats, pcd, instr_feats
 
 
 def load_input_data():
@@ -58,6 +70,27 @@ def load_input_data():
     instruction_file_path = "./instructions/peract2/instructions.json"
     train_dataset = Peract2Dataset(root=data_dir_path, instructions=instruction_file_path)
     print("Number of samples in Peract2Dataset:", len(train_dataset))
+
+    # definde dataset args
+    from collections import namedtuple
+    datset_args = namedtuple("args", ["dataset", "keypose_only", "num_history", 'custom_img_size', 'eval_only', 'log_dir'])
+    
+    args = datset_args(
+        dataset="peract2",
+        keypose_only=False,
+        num_history=1,
+        custom_img_size=None,
+        eval_only=True,
+        log_dir="./train_log"
+    )
+    # define preprocessor
+    preprocessor_class = fetch_data_preprocessor(args.dataset)
+    preprocessor = preprocessor_class(
+            args.keypose_only,
+            args.num_history,
+            custom_imsize=args.custom_img_size,
+            depth2cloud=fetch_depth2cloud(args.dataset)
+        )
 
     # params
     batch_size = 8
@@ -111,36 +144,60 @@ def load_input_data():
         persistent_workers=True
     )
     sample = next(iter(train_loader))
-    print(sample)
+    # print(sample)
 
-    @torch.no_grad()
-    def prepare_batch(sample, augment=False):
-        sample["action"] = self.preprocessor.process_actions(sample["action"])
-        proprio = self.preprocessor.process_proprio(sample["proprioception"])
-        rgbs, pcds = self.preprocessor.process_obs(
-            sample["rgb"], sample["rgb2d"],
-            sample["depth"], sample["extrinsics"], sample["intrinsics"],
-            augment=augment
-        )
-        return (
-            sample["action"],
-            torch.zeros(sample["action"].shape[:-1], dtype=bool, device='cuda'),
-            rgbs,
-            None,
-            pcds,
-            sample["instr"],
-            proprio
-        )
-    
-    batch = prepare_batch(sample)
+    if args.dataset == "peract2" or args.dataset == "rlbench":
+        @torch.no_grad()
+        def prepare_batch_rlbench(sample, augment=False):
+            sample["action"] = preprocessor.process_actions(sample["action"])
+            proprio = preprocessor.process_proprio(sample["proprioception"])
+            rgbs, pcds = preprocessor.process_obs(
+                sample["rgb"], sample["rgb2d"],
+                sample["depth"], sample["extrinsics"], sample["intrinsics"],
+                augment=augment
+            )
+            return (
+                sample["action"],
+                torch.zeros(sample["action"].shape[:-1], dtype=bool, device='cuda'),
+                rgbs,
+                None,
+                pcds,
+                sample["instr"],
+                proprio
+            )
+        
+        batch = prepare_batch_rlbench(sample)
+
+    elif args.dataset == "peract":
+        @torch.no_grad()
+        def prepare_batch_peract(sample, augment=False):
+            sample["action"] = preprocessor.process_actions(sample["action"])
+            proprio = preprocessor.process_proprio(sample["proprioception"])
+            rgbs, pcds = preprocessor.process_obs(
+                sample["rgb"], sample["pcd"],
+                augment=augment
+            )
+            return (
+                sample["action"],
+                torch.zeros(sample["action"].shape[:-1], dtype=bool, device='cuda'),
+                rgbs,
+                None,
+                pcds,
+                sample["instr"],
+                proprio
+            )
+        
+        batch = prepare_batch_peract(sample)
     
     return batch
 
 def test_encoder(encoder: TesterEncoder):
     instruction = ["push the box to the red area"]
-    rgb_img, pointcloud = load_input_data()
+    action, action_mask, rgbs, rgb2d, pcds, instr, prop = load_input_data()
 
-    encoder.encode_inputs(rgb_img, None, pointcloud, instruction, None)
+    # rgb2d 는 2d 카메라용 입력 공간으로, depth cam 만으로 구성된 입력에 대해서는 값을 전달하지 않는다.
+    # encoder.encode_inputs(rgbs, None, pcds, instr, prop)
+    encoder.encode_clip(rgbs, None, pcds, instr)
 
 if __name__ == "__main__":
     tester = TesterEncoder()

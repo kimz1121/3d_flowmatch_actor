@@ -14,6 +14,7 @@ class RLBenchTrainTester(BaseTrainTester):
             sample["depth"], sample["extrinsics"], sample["intrinsics"],
             augment=augment
         )
+        
         return (
             sample["action"],
             torch.zeros(sample["action"].shape[:-1], dtype=bool, device='cuda'),
