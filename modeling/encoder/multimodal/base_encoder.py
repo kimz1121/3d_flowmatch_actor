@@ -120,6 +120,8 @@ class Encoder(nn.Module):
         """
         return None, None, None, None
 
+    # density based sampler 를 활용하여 포인트 클라우드 위치와, 해당 위치의 피쳐중 필요한 부분만 subsampling 함.
+    # clip feature와 point cloud 피쳐는 H, W 차원을 통해 1대1 대응됨
     def run_dps(self, features, pos):
         # features (B, Np, F)
         # context_pos (B, Np, 3)

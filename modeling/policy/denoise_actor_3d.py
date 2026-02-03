@@ -92,7 +92,7 @@ class TransformerHead(BaseTransformerHead):
         instr_feats, instr_pos
     ):
         rel_traj_pos = self.relative_pe_layer(traj_xyz)
-        rel_scene_pos = self.relative_pe_layer(rgb3d_pos)
+        rel_scene_pos = self.relative_pe_layer(rgb3d_pos)# pcd 데이터가 그대로 들어가게 된다.
         rel_fps_pos = self.relative_pe_layer(fps_scene_pos)
         rel_pos = torch.cat([rel_traj_pos, rel_fps_pos], 1)
         return rel_traj_pos, rel_scene_pos, rel_pos
