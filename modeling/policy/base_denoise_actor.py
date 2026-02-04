@@ -544,6 +544,11 @@ class TransformerHead(nn.Module):
             traj_feats, fps_scene_feats,
             rgb3d_feats, rgb2d_feats, instr_feats
         )
+
+        # HPT 스타일로 Stem 이 끝나는 경계
+        # <Stem end>================================
+        # <Trunk start>================================
+
         features = self.self_attn(
             seq1=features,
             seq2=features,
@@ -551,6 +556,9 @@ class TransformerHead(nn.Module):
             seq2_pos=rel_pos,
             ada_sgnl=time_embs
         )[-1]
+
+        # <Trunk end>================================
+        # <head start>================================
 
         # Rotation head
         rotation = self.predict_rot(
@@ -564,6 +572,8 @@ class TransformerHead(nn.Module):
 
         # Openess head from position head
         openess = self.openess_predictor(position_features)
+
+        # <head end>================================
 
         return [
             torch.cat((position, rotation, openess), -1)
