@@ -71,7 +71,7 @@ class EfficientFeaturePyramidNetwork(FeaturePyramidNetwork):
                 inner_lateral = self.get_result_from_inner_blocks(x[idx], idx)
                 feat_shape = inner_lateral.shape[-2:]
                 inner_top_down = F.interpolate(last_inner, size=feat_shape, mode="nearest")
-                last_inner = (inner_lateral + inner_top_down).contiguous()
+                last_inner = (inner_lateral + inner_top_down).contiguous()# 기로 피쳐와 세로 피쳐를 모두 반영하기 위한 수단인가?
                 results.insert(0, self.get_result_from_layer_blocks(last_inner, idx))
 
                 # Stop early if we've reached desired output level

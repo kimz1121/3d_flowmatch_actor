@@ -226,3 +226,99 @@ class SpatialStem_3DFA(PolicyStem):
         x = x[:, :, ::token_perpoint_num].transpose(-1, -2) 
         token_feat = self.linear(x).view(B, T, -1, self.out_dim)
         return token_feat
+
+
+from encoder.vision.clip import load_clip
+from einops import rearrange, repeat
+from torch.nn import functional as F
+from encoder.vision.fpn import EfficientFeaturePyramidNetwork
+from collections import OrderedDict
+    
+class SpatialStem_3DFA(PolicyStem):
+    def __init__(
+            self, 
+            output_dim: int = 10,
+            num_of_copy: int = 1,# ? 중요한가? depth의 경우는 합쳐질 수있지 않나? 카메라 개수 차원을 추가해서 반환? 
+            vision_backbone: str = "clip"
+        ):
+        super().__init__()
+
+        self.backbone, self.normalize = load_clip()
+
+        # 차후 기본 feature_pyramid 구현과, 3D-FA 의 feature_pyramid 구현간의 차이점 비교하기
+        # Postprocess scene features
+        if self._backbone_name == 'clip':
+            self.output_level = "res3"
+            self.feature_pyramid = EfficientFeaturePyramidNetwork(
+                [64, 256, 512, 1024, 2048],
+                embedding_dim, output_level="res3"
+            )
+            self.rgb2d_proj = nn.Linear(1024, embedding_dim)
+
+
+
+
+        
+        # 가져온 예시 코드
+        input_dim = input_dim[0]
+        self.input_dim = input_dim
+        self.out_dim = output_dim
+        self.point_num = point_num
+        self.token_num = token_num
+
+        layers = []
+        for oc in widths:
+            layers.extend(
+                [
+                    nn.Conv1d(input_dim, oc, 1, bias=False), 
+                    nn.LayerNorm((oc, self.point_num)), 
+                ]
+            )
+            input_dim = oc
+
+        self.linear = nn.Linear(widths[-1], output_dim)
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, rgb_input: torch.Tensor, depth_inputs: torch.Tensor) -> torch.Tensor:
+
+        # # Encode language
+        # instruction = self.text_encoder(text)
+        # instr_feats = self.instruction_encoder(instruction)
+
+        # 3D camera features
+        num_cameras = rgb_input.shape[1]
+        # Pass each view independently through backbone
+        rgb_input = rearrange(rgb_input, "bt ncam c h w -> (bt ncam) c h w")
+        rgb_input = self.normalize(rgb_input)# Resnet의 사전 조사된 통계 정보를 통해서 값을 표준화 처리해준다.
+        rgb_feats = self.backbone(rgb_input)
+        # Pass visual features through feature pyramid network
+        rgb_feats:torch.Tensor = self.feature_pyramid(rgb_feats)[self.output_level]
+        feat_h, feat_w = rgb_feats.shape[-2:]
+        # Merge different cameras
+        rgb_feats = rearrange(
+            rgb_feats,
+            "(bt ncam) c h w -> bt (ncam h w) c", ncam=num_cameras
+        )
+        # Attention from vision to language
+        # rgb3d_feats = self.vl_attention(seq1=rgb3d_feats, seq2=instr_feats)[-1]
+        # -> 일단 언어 피쳐는 제외한 체로 실험하자. 
+
+        # Point cloud
+        num_cameras = pcd.shape[1]
+        # Interpolate point cloud to get the corresponding locations
+        pcd = F.interpolate(
+            rearrange(pcd, "bt ncam c h w -> (bt ncam) c h w"),
+            (feat_h, feat_w),
+            mode='bilinear'
+        )
+
+        # Merge different cameras
+        pcd = rearrange(
+            pcd,
+            "(bt ncam) c h w -> bt (ncam h w) c", ncam=num_cameras
+        )
+
+        # 여러 카메라에 있던 장보를 하나로 합침?. 그리고 카메라간의 오차를 보완하기 위해 troch.nn.Functional.interpolate 를 적용한 것으로 보임...?
+
+        # 2D camera features (don't support mixed cameras in this release)
+        rgb2d_feats = None

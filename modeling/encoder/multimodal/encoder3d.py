@@ -109,7 +109,7 @@ class Encoder(BaseEncoder):
         num_cameras = rgb3d.shape[1]
         # Pass each view independently through backbone
         rgb3d = einops.rearrange(rgb3d, "bt ncam c h w -> (bt ncam) c h w")
-        rgb3d = self.normalize(rgb3d)
+        rgb3d = self.normalize(rgb3d)# Resnet의 사전 조사된 통계 정보를 통해서 값을 표준화 처리해준다.
         rgb3d_feats = self.backbone(rgb3d)
         # Pass visual features through feature pyramid network
         rgb3d_feats = self.feature_pyramid(rgb3d_feats)[self.output_level]

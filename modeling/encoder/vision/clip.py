@@ -33,7 +33,7 @@ def load_clip():
     normalize = CLIPTransform()
     return backbone, normalize
 
-
+# 피텨를 레이어의 중간 단계별로 구분하여 추출할 수 있도록 forward 함수만 overide 하여 변형함.
 class ModifiedResNetFeatures(ModifiedResNet):
     def __init__(self, layers, output_dim, heads, input_resolution=224, width=64):
         super().__init__(layers, output_dim, heads, input_resolution, width)
