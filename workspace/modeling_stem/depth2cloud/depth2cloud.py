@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 
-class RLBenchDepth2Cloud:
+class Depth2Cloud:
 
     def __init__(self, shape):
         self.uniforms = torch.from_numpy(

@@ -233,58 +233,42 @@ from einops import rearrange, repeat
 from torch.nn import functional as F
 from encoder.vision.fpn import EfficientFeaturePyramidNetwork
 from collections import OrderedDict
+from depth2cloud.depth2cloud import Depth2Cloud
+from embedding.position_encodings import RotaryPositionEncoding3D
     
 class SpatialStem_3DFA(PolicyStem):
     def __init__(
             self, 
             output_dim: int = 10,
-            num_of_copy: int = 1,# ? 중요한가? depth의 경우는 합쳐질 수있지 않나? 카메라 개수 차원을 추가해서 반환? 
-            vision_backbone: str = "clip"
+            inner_feature_dim: int = 128,
         ):
         super().__init__()
 
         self.backbone, self.normalize = load_clip()
+        # backbone of clip from 3D-FA is 'ModifiedResNetFeatures'
 
         # 차후 기본 feature_pyramid 구현과, 3D-FA 의 feature_pyramid 구현간의 차이점 비교하기
         # Postprocess scene features
-        if self._backbone_name == 'clip':
-            self.output_level = "res3"
-            self.feature_pyramid = EfficientFeaturePyramidNetwork(
-                [64, 256, 512, 1024, 2048],
-                embedding_dim, output_level="res3"
-            )
-            self.rgb2d_proj = nn.Linear(1024, embedding_dim)
+        self.output_level = "res3"
+        self.feature_pyramid = EfficientFeaturePyramidNetwork(
+            [64, 256, 512, 1024, 2048],
+            inner_feature_dim, output_level="res3"
+        )
 
+        self.depth_to_point = Depth2Cloud(256, 256)
 
+        self.relative_pe_layer = RotaryPositionEncoding3D(inner_feature_dim)
 
-
+    def _depth_inputs_to_point_cloud(self, depth_inputs: torch.Tensor, extrinsic: torch.Tensor, intrinsic: torch.Tensor)->torch.Tensor:
+        point_cloud_egocentric_2d = self.depth_to_point(depth_inputs, extrinsic, intrinsic)
+        return point_cloud_egocentric_2d
+    
+    def _3d_point_cloud_encoding(self):
         
-        # 가져온 예시 코드
-        input_dim = input_dim[0]
-        self.input_dim = input_dim
-        self.out_dim = output_dim
-        self.point_num = point_num
-        self.token_num = token_num
+        pass
 
-        layers = []
-        for oc in widths:
-            layers.extend(
-                [
-                    nn.Conv1d(input_dim, oc, 1, bias=False), 
-                    nn.LayerNorm((oc, self.point_num)), 
-                ]
-            )
-            input_dim = oc
 
-        self.linear = nn.Linear(widths[-1], output_dim)
-        self.net = nn.Sequential(*layers)
-
-    def forward(self, rgb_input: torch.Tensor, depth_inputs: torch.Tensor) -> torch.Tensor:
-
-        # # Encode language
-        # instruction = self.text_encoder(text)
-        # instr_feats = self.instruction_encoder(instruction)
-
+    def _vision_encoding(self, rgb_input: torch.Tensor):
         # 3D camera features
         num_cameras = rgb_input.shape[1]
         # Pass each view independently through backbone
@@ -293,32 +277,58 @@ class SpatialStem_3DFA(PolicyStem):
         rgb_feats = self.backbone(rgb_input)
         # Pass visual features through feature pyramid network
         rgb_feats:torch.Tensor = self.feature_pyramid(rgb_feats)[self.output_level]
+
+        return rgb_feats
+
+    def _language_encoding(self):
+        # Attention from vision to language
+        # # Encode language
+        # instruction = self.text_encoder(text)
+        # instr_feats = self.instruction_encoder(instruction)
+
+        # rgb3d_feats = self.vl_attention(seq1=rgb3d_feats, seq2=instr_feats)[-1]
+        # -> 일단 언어 피쳐는 제외한 체로 실험하자. 
+        pass
+
+    def forward(self, rgb_input: torch.Tensor, depth_inputs: torch.Tensor, extrinsic: torch.Tensor, intrinsic: torch.Tensor) -> torch.Tensor:
+        # RGB Feature
+        rgb_feats = self._vision_encoding(rgb_input)
+
+        # Point cloud
+        # dimension = (bt ncam c h w)
+        point_cloud_feature = self._depth_inputs_to_point_cloud(depth_inputs, extrinsic, intrinsic)
+
+        num_cameras = point_cloud_feature.shape[1]
+        # Interpolate point cloud to get the corresponding locations of RGB feature
         feat_h, feat_w = rgb_feats.shape[-2:]
+        point_cloud_feature = F.interpolate(
+            rearrange(point_cloud_feature, "bt ncam c h w -> (bt ncam) c h w"),
+            (feat_h, feat_w),
+            mode='bilinear'
+        )
+        # interpolation하는 이유는 
+        # pcd 포인트의 개수는 원본이미지의 화소와 같은 수를 갖지만,
+        # rgb_feats는 Resnet의 Convolution과 Avgpooling에서의 Stride 에 의해 차원의 길이가 줄어들기 때문.
+        # 피쳐의 수가 서로 달라 pcd 데이터에 rgb_feats를 입히는 과정에서 대응되지 않는 점을 제외시키는 역할을 함.
         # Merge different cameras
+
         rgb_feats = rearrange(
             rgb_feats,
             "(bt ncam) c h w -> bt (ncam h w) c", ncam=num_cameras
         )
-        # Attention from vision to language
-        # rgb3d_feats = self.vl_attention(seq1=rgb3d_feats, seq2=instr_feats)[-1]
-        # -> 일단 언어 피쳐는 제외한 체로 실험하자. 
-
-        # Point cloud
-        num_cameras = pcd.shape[1]
-        # Interpolate point cloud to get the corresponding locations
-        pcd = F.interpolate(
-            rearrange(pcd, "bt ncam c h w -> (bt ncam) c h w"),
-            (feat_h, feat_w),
-            mode='bilinear'
-        )
-
+        
         # Merge different cameras
-        pcd = rearrange(
-            pcd,
+        point_cloud_feature = rearrange(
+            point_cloud_feature,
             "(bt ncam) c h w -> bt (ncam h w) c", ncam=num_cameras
         )
 
-        # 여러 카메라에 있던 장보를 하나로 합침?. 그리고 카메라간의 오차를 보완하기 위해 troch.nn.Functional.interpolate 를 적용한 것으로 보임...?
+        # get 3d positional embedding
+        point_cloud_pos_embedding = self.relative_pe_layer(point_cloud_feature)
+        point_cloud_feature = point_cloud_feature + point_cloud_pos_embedding# token 정보에 positional embedding 정보 첨가!! 더 좋은 방식의 임베딩은 없는다? rotaryposional embedding은 덧셈이 아니라, sin, cos 성분이 각각 만들어 지지 않나?
 
-        # 2D camera features (don't support mixed cameras in this release)
-        rgb2d_feats = None
+        pass
+
+
+
+

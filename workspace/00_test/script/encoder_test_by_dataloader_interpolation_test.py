@@ -12,11 +12,6 @@ from utils.data_preprocessors import fetch_data_preprocessor
 from utils.depth2cloud import fetch_depth2cloud
 
 
-class EncoderDebug(Encoder):
-    def __init__(self, backbone="clip", embedding_dim=60, nhist=1, num_attn_heads=9, num_vis_instr_attn_layers=2, fps_subsampling_factor=5, finetune_backbone=False, finetune_text_encoder=False):
-        super().__init__(backbone, embedding_dim, nhist, num_attn_heads, num_vis_instr_attn_layers, fps_subsampling_factor, finetune_backbone, finetune_text_encoder)
-
-
 class TesterEncoder:
     def __init__(self,
                  # Encoder arguments
@@ -27,7 +22,7 @@ class TesterEncoder:
                  num_vis_instr_attn_layers=2,
                  fps_subsampling_factor=5,
                  # Encoder and decoder arguments
-                 embedding_dim=120,
+                 embedding_dim=64,
                  num_attn_heads=8,
                  nhist=3,
                  nhand=1,
@@ -41,7 +36,7 @@ class TesterEncoder:
                  # Training arguments
                  lv2_batch_size=1):
         
-        self.encoder = EncoderDebug(
+        self.encoder = Encoder(
             backbone=backbone,
             embedding_dim=embedding_dim,
             nhist=nhist * nhand,
@@ -228,9 +223,11 @@ if __name__ == "__main__":
     load_input_data()
 
     feature_tuple = test_encoder(tester)
+    # print(feature_tuple)
 
     feature:torch.Tensor
     for feature in feature_tuple:
-        print(feature.shape)
+        if feature is not None:
+            print(feature.shape)
 
     

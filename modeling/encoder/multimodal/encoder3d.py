@@ -121,10 +121,17 @@ class Encoder(BaseEncoder):
         )
         # Attention from vision to language
         rgb3d_feats = self.vl_attention(seq1=rgb3d_feats, seq2=instr_feats)[-1]
+        print("rgb3d_feats.shape")
+        print(rgb3d_feats.shape)
 
         # Point cloud
         num_cameras = pcd.shape[1]
         # Interpolate point cloud to get the corresponding locations
+        print("pcd.shape")
+        print(pcd.shape)
+
+        print(f"feat_h: {feat_h}")
+        print(f"feat_w: {feat_w}")
         pcd = F.interpolate(
             einops.rearrange(pcd, "bt ncam c h w -> (bt ncam) c h w"),
             (feat_h, feat_w),

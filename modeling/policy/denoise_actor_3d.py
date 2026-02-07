@@ -93,7 +93,7 @@ class TransformerHead(BaseTransformerHead):
     ):
         rel_traj_pos = self.relative_pe_layer(traj_xyz)
         rel_scene_pos = self.relative_pe_layer(rgb3d_pos)# pcd 데이터가 그대로 들어가게 된다.
-        rel_fps_pos = self.relative_pe_layer(fps_scene_pos)
+        rel_fps_pos = self.relative_pe_layer(fps_scene_pos)# density based sampling이 적용된 데이터가 들어가게 된다. pcd 원본의 약 1/8이 기본 설정
         rel_pos = torch.cat([rel_traj_pos, rel_fps_pos], 1)
         return rel_traj_pos, rel_scene_pos, rel_pos
 
