@@ -235,14 +235,17 @@ from encoder.vision.fpn import EfficientFeaturePyramidNetwork
 from collections import OrderedDict
 from depth2cloud.depth2cloud import Depth2Cloud
 from embedding.position_encodings import RotaryPositionEncoding3D
+from encoder.dendsity_based_sampler import density_based_sampler
     
 class SpatialStem_3DFA(PolicyStem):
     def __init__(
             self, 
             output_dim: int = 10,
             inner_feature_dim: int = 128,
+            subsampling_factor: float = 5
         ):
         super().__init__()
+        self.subsampling_factor = subsampling_factor
 
         self.backbone, self.normalize = load_clip()
         # backbone of clip from 3D-FA is 'ModifiedResNetFeatures'
@@ -263,7 +266,7 @@ class SpatialStem_3DFA(PolicyStem):
         point_cloud_egocentric_2d = self.depth_to_point(depth_inputs, extrinsic, intrinsic)
         return point_cloud_egocentric_2d
     
-    def _3d_point_cloud_encoding(self):
+    def _3d_point_cloud_encoding(self, poin):
         
         pass
 
@@ -290,19 +293,44 @@ class SpatialStem_3DFA(PolicyStem):
         # -> 일단 언어 피쳐는 제외한 체로 실험하자. 
         pass
 
+    def _run_dps(self, features: torch.Tensor, pos: torch.Tensor):
+        # features (B, Np, F)
+        # context_pos (B, Np, 3)
+        # outputs of analogous shape, with smaller Np
+        if self.subsampling_factor == 1:
+            return features, pos
+
+        bs, npts, ch = features.shape
+        sampled_inds = density_based_sampler(features, self.subsampling_factor)
+        # 원래의 3D-FA의 코드에서 왜, PointCloud가 아닌, 3Drgb resnet Feature에 대해서 거리를 측정하고 Subsampling 하는거지? 
+        # 그것도 코사인 유사도 기준이 아닌 유클리드 거리 기준으로 측정하는 거지?
+
+        # Sample features
+        expanded_inds = sampled_inds.unsqueeze(-1).expand(-1, -1, ch)  # B Np F
+        sampled_features = torch.gather(features, 1, expanded_inds)
+
+        # If positions are None, return
+        if pos is None:
+            return sampled_features, None
+
+        # Else sample positions
+        expanded_inds = sampled_inds.unsqueeze(-1).expand(-1, -1, 3)  # B Np 3
+        sampled_pos = torch.gather(pos, 1, expanded_inds)
+        return sampled_features, sampled_pos
+    
     def forward(self, rgb_input: torch.Tensor, depth_inputs: torch.Tensor, extrinsic: torch.Tensor, intrinsic: torch.Tensor) -> torch.Tensor:
         # RGB Feature
         rgb_feats = self._vision_encoding(rgb_input)
 
         # Point cloud
         # dimension = (bt ncam c h w)
-        point_cloud_feature = self._depth_inputs_to_point_cloud(depth_inputs, extrinsic, intrinsic)
+        point_cloud_2D_array = self._depth_inputs_to_point_cloud(depth_inputs, extrinsic, intrinsic)
 
-        num_cameras = point_cloud_feature.shape[1]
+        num_cameras = point_cloud_2D_array.shape[1]
         # Interpolate point cloud to get the corresponding locations of RGB feature
         feat_h, feat_w = rgb_feats.shape[-2:]
-        point_cloud_feature = F.interpolate(
-            rearrange(point_cloud_feature, "bt ncam c h w -> (bt ncam) c h w"),
+        point_cloud_2D_array = F.interpolate(
+            rearrange(point_cloud_2D_array, "bt ncam c h w -> (bt ncam) c h w"),
             (feat_h, feat_w),
             mode='bilinear'
         )
@@ -318,14 +346,20 @@ class SpatialStem_3DFA(PolicyStem):
         )
         
         # Merge different cameras
-        point_cloud_feature = rearrange(
-            point_cloud_feature,
+        point_cloud = rearrange(
+            point_cloud_2D_array,
             "(bt ncam) c h w -> bt (ncam h w) c", ncam=num_cameras
         )
 
+        rgb_subsampled, point_cloud_subsampled = self._run_dps(rgb_subsampled, point_cloud)
+
         # get 3d positional embedding
-        point_cloud_pos_embedding = self.relative_pe_layer(point_cloud_feature)
-        point_cloud_feature = point_cloud_feature + point_cloud_pos_embedding# token 정보에 positional embedding 정보 첨가!! 더 좋은 방식의 임베딩은 없는다? rotaryposional embedding은 덧셈이 아니라, sin, cos 성분이 각각 만들어 지지 않나?
+        point_cloud_pos_embedded = self.relative_pe_layer(point_cloud)
+        
+        # TODO: rgb_feats 피쳐를 사용하고, point_cloud_pos_embedded 정보를 위치 임베딩으로 활용하는 코드를 만들고 싶어  
+        rgb_feats
+        point_cloud_pos_embedded
+
 
         pass
 

@@ -1,6 +1,8 @@
 import torch
 from torch import nn
 
+
+
 @torch.no_grad()
 def density_based_sampler(features, subsample_factor, k=8):
     """
