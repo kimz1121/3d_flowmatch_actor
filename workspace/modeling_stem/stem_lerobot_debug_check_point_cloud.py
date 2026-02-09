@@ -417,6 +417,29 @@ class SpatialStem_3DFA(PolicyStem):
 
         rgb_feature_subsampled, point_cloud_subsampled = self._run_dps(rgb_feats, point_cloud)
 
+        print(f"rgb_feature_subsampled.shape : {rgb_feature_subsampled.shape}")
+        print(f"point_cloud_subsampled.shape : {point_cloud_subsampled.shape}")
+
+        import os
+        def save_pointcloud_as_ply(points, filename="../data/cloud.ply"):
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+            N = points.shape[0]
+            with open(filename, 'w') as f:
+                f.write("ply\n")
+                f.write("format ascii 1.0\n")
+                f.write(f"element vertex {N}\n")
+                f.write("property float x\n")
+                f.write("property float y\n")
+                f.write("property float z\n")
+                f.write("end_header\n")
+                for i in range(N):
+                    f.write(f"{points[i,0]} {points[i,1]} {points[i,2]}\n")
+            print(f"[+] Saved point cloud to: {filename}")
+        
+
+        pc = point_cloud_subsampled.reshape(-1, 3).cpu().numpy()  # (H*W, 3)
+        save_pointcloud_as_ply(pc, "workspace/modeling_stem/data/cloud_cam0.ply")
+        raise
         # point_cloud, point_cloud_subsampled 정보는 위치 임베딩의 역할을 한다. 
         # 각 피쳐가 3D 공간상에서 어떤 위치에 존재했는지 피쳐간의 공간적 위치 차이를 
         # 포인트 클라우드 점의 위치를 직접 활용한 positional embedding을 이용하여 표현한다.
@@ -491,7 +514,7 @@ if __name__ == "__main__":
         num_heads=8,
         num_self_attn_layers=2,
         dropout=0.0,
-    )
+    ).to("cuda")
     
     output = stem(rgb_img, depth_img, extrinsics, intrinsics)
     

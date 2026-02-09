@@ -226,8 +226,7 @@ class RoPESelfAttention(nn.Module):
 class SpatialStem_3DFA(PolicyStem):
     def __init__(
             self, 
-            output_dim: int = 10,
-            inner_feature_dim: int = 128,
+            output_dim: int = 128,
             subsampling_factor: float = 5,
             # 내부 transformer Hyper Parameter
             num_heads: int = 8,
@@ -237,6 +236,8 @@ class SpatialStem_3DFA(PolicyStem):
         super().__init__()
         # === 시스템 기본설정 ===
         self.subsampling_factor = subsampling_factor
+        # debug 용 임시 선언
+        self.output_dim = output_dim
 
         # === RGB 2d semantic feature embedding ===
         # CLIP
@@ -249,17 +250,14 @@ class SpatialStem_3DFA(PolicyStem):
         self.output_level = "res3"
         self.feature_pyramid = EfficientFeaturePyramidNetwork(
             [64, 256, 512, 1024, 2048],
-            inner_feature_dim, output_level="res3"
+            output_dim, output_level="res3"
         )
 
         # === Depth to PointCloud 변환 ===
         self.depth_to_point = Depth2Cloud((256, 256))
 
-        # === 3D feature positonal embedding === 
-        self.relative_pe_layer = RotaryPositionEncoding3D(inner_feature_dim)
-
         # === Define 3D Layer ===
-                # ===== RoPE 위치 인코딩 생성기 =====
+        # ===== RoPE 위치 인코딩 생성기 =====
         # feature에 더하는 게 아니라, cos/sin 값만 만들어주는 역할
         self.relative_pe_layer = RotaryPositionEncoding3D(output_dim)
 
@@ -296,7 +294,7 @@ class SpatialStem_3DFA(PolicyStem):
         # )
         # 이 부분은 클래스 스스로 호출하는 함수가 아니라 외부에서 호출하도록 정의된 함수임.
         # HPT에서 이런 불편한 구조를 활용한 이유에 대해서 생각해 볼 필요가 있음.
-
+        self.init_cross_attn()
 
     def _depth_inputs_to_point_cloud(self, depth_inputs: torch.Tensor, extrinsic: torch.Tensor, intrinsic: torch.Tensor)->torch.Tensor:
         point_cloud_egocentric_2d = self.depth_to_point(depth_inputs, extrinsic, intrinsic)
@@ -364,7 +362,8 @@ class SpatialStem_3DFA(PolicyStem):
         # ===== 1. RoPE용 cos/sin 생성 =====
         # point_cloud 좌표 → cos/sin 값 (feature와 분리!)
         rotary_pos = self.relative_pe_layer(point_cloud)  # [B, N, D, 2]
-
+        
+        print(f"rotary_pos.shape : {rotary_pos.shape}")
         # ===== 2. Self Attention (RoPE 적용) =====
         x = rgb_feats
         for i in range(len(self.self_attn_layers)):
@@ -416,7 +415,11 @@ class SpatialStem_3DFA(PolicyStem):
         )
 
         rgb_feature_subsampled, point_cloud_subsampled = self._run_dps(rgb_feats, point_cloud)
+        
+        print(f"rgb_feature_subsampled.shape : {rgb_feature_subsampled.shape}")
+        print(f"point_cloud_subsampled.shape : {point_cloud_subsampled.shape}")
 
+        
         # point_cloud, point_cloud_subsampled 정보는 위치 임베딩의 역할을 한다. 
         # 각 피쳐가 3D 공간상에서 어떤 위치에 존재했는지 피쳐간의 공간적 위치 차이를 
         # 포인트 클라우드 점의 위치를 직접 활용한 positional embedding을 이용하여 표현한다.
@@ -429,7 +432,55 @@ class SpatialStem_3DFA(PolicyStem):
         # 차후 코드 검증을 Claud에 돌려보기
         return latent_tokens
 
+    def compute_latent(self, rgb_input: torch.Tensor, depth_inputs: torch.Tensor, extrinsic: torch.Tensor, intrinsic: torch.Tensor) -> Tensor:
+        """
+        Computes the latent representations of input data by attention.
 
+        Args:
+            Input tensor with shape [32, 3, 1, 49, 512] representing the batch size,
+            horizon, instance (e.g. num of views), number of features, and feature dimensions respectively.
+
+        Returns:
+            Output tensor with latent tokens, shape [32, 16, 128], where 16 is the number
+            of tokens and 128 is the dimensionality of each token.
+
+        Examples for vision features from ResNet:
+        >>> x = np.random.randn(32, 3, 1, 49, 512)
+        >>> latent_tokens = model.compute_latent(x)
+        >>> print(latent_tokens.shape)
+        (32, 16, 128)
+
+        Examples for proprioceptive features:
+        >>> x = np.random.randn(32, 3, 1, 7)
+        >>> latent_tokens = model.compute_latent(x)
+        >>> print(latent_tokens.shape)
+        (32, 16, 128)
+        """
+        # Initial reshape to adapt to token dimensions
+        stem_feat = self(rgb_img, depth_img, extrinsics, intrinsics)  # (32, 3, 1, 49, 128)
+        stem_feat = stem_feat.reshape(stem_feat.shape[0], -1, stem_feat.shape[-1])  # (32, 147, 128)
+
+        
+        # Replicating tokens for each item in the batch and computing cross-attention
+        stem_tokens = self.tokens.repeat(len(stem_feat), 1, 1)  # (32, 16, 128)
+
+        print(f"stem_feat.shape : {stem_feat.shape}")
+        print(f"stem_tokens.shape : {stem_tokens.shape}")
+
+        stem_tokens = self.cross_attention(stem_tokens, stem_feat)  # (32, 16, 128)
+        return stem_tokens
+
+    def init_cross_attn(self):
+        """initialize cross attention module and the learnable tokens"""
+        token_num = 16# getattr(stem_spec, modality + "_crossattn_latent")
+        self.tokens = nn.Parameter(torch.randn(1, token_num, self.output_dim) * INIT_CONST)
+
+        self.cross_attention = CrossAttention(
+            self.output_dim,
+            heads=8,#stem_spec.crossattn_heads,
+            dim_head=64,#stem_spec.crossattn_dim_head,
+            dropout=0.1#stem_spec.crossattn_modality_dropout,
+        ).to("cuda")
 
 if __name__ == "__main__":
     # B, T, N, D = 4, 3, 1024, 128
@@ -485,15 +536,16 @@ if __name__ == "__main__":
     # 모델 생성
     stem =  SpatialStem_3DFA(
         output_dim=64,
-        inner_feature_dim=128,
         subsampling_factor=5,
         # 내부 transformer Hyper Parameter
         num_heads=8,
         num_self_attn_layers=2,
         dropout=0.0,
-    )
+    ).to("cuda")
     
-    output = stem(rgb_img, depth_img, extrinsics, intrinsics)
+    # output = stem(rgb_img, depth_img, extrinsics, intrinsics)
+    # stem.init_cross_attn()# 디버그용 임시 함수 호출
+    output = stem.compute_latent(rgb_img, depth_img, extrinsics, intrinsics)
     
     print(f"Input  - rgb_img: {rgb_img.shape}, depth_img: {depth_img.shape}, extrinsics: {extrinsics.shape}, intrinsics: {intrinsics.shape}")
     print(f"Output - latent_tokens: {output.shape}")
